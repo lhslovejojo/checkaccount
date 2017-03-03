@@ -1,0 +1,8 @@
+<html>
+<body>
+<form action="grabData" method="post">
+  <p>日期: <input type="text" name="dayStr" /></p>
+  <input type="submit" value="Submit" />
+</form>
+</body>
+</html>
