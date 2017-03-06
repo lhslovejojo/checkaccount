@@ -29,6 +29,11 @@ public class AnalysisRecord implements Serializable {
 	 * 异常编码
 	 */
 	private String errorCode;
+	/**
+	 * 解析批次号
+	 */
+	private String analysisBatchNo;
+	
 
 	public Long getId() {
 		return id;
@@ -85,5 +90,13 @@ public class AnalysisRecord implements Serializable {
 	public void setErrorStepDesc(String errorStepDesc) {
 		this.errorStepDesc = errorStepDesc;
 	}
+	public String getAnalysisBatchNo() {
+		return analysisBatchNo;
+	}
+
+	public void setAnalysisBatchNo(String analysisBatchNo) {
+		this.analysisBatchNo = analysisBatchNo;
+	}
+
 
 }

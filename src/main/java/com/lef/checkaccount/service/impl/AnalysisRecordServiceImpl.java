@@ -34,6 +34,7 @@ public class AnalysisRecordServiceImpl implements AnalysisRecordService {
 				record.setErrorStep(rs.getInt("error_step"));
 				record.setErrorStepDesc(rs.getString("error_step_desc"));
 				record.setStatus(rs.getString("status"));
+				record.setAnalysisBatchNo(rs.getString("analysis_batch_no"));
 				return record;
 			}
 		});
@@ -45,25 +46,25 @@ public class AnalysisRecordServiceImpl implements AnalysisRecordService {
 
 	public AnalysisRecord saveAnalysisRecord(AnalysisRecord analysisRecord) {
 		if (findByDay(analysisRecord.getAnalysisDay()) != null) {
-			String sql = "update  analysis_record set status=?,error_step=?,error_step_desc=?,error_msg=?,error_code=? where analysis_day=?";
+			String sql = "update  analysis_record set status=?,error_step=?,error_step_desc=?,error_msg=?,error_code=?,analysis_batch_no=? where analysis_day=?";
 			dbManager.getJdbcTemplate().update(sql,
 					new Object[] { analysisRecord.getStatus(), analysisRecord.getErrorStep(),
 							analysisRecord.getErrorStepDesc(), analysisRecord.getErrorMsg(),
-							analysisRecord.getErrorCode(), analysisRecord.getAnalysisDay() });
+							analysisRecord.getErrorCode(),analysisRecord.getAnalysisBatchNo() , analysisRecord.getAnalysisDay()});
 		} else {
-			String sql = "insert into analysis_record(analysis_day,status) values (?,?)";
+			String sql = "insert into analysis_record(analysis_day,status,analysis_batch_no) values (?,?,?)";
 			dbManager.getJdbcTemplate().update(sql,
-					new Object[] { analysisRecord.getAnalysisDay(), analysisRecord.getStatus()});
+					new Object[] { analysisRecord.getAnalysisDay(), analysisRecord.getStatus(),analysisRecord.getAnalysisBatchNo()});
 		}
 		return findByDay(analysisRecord.getAnalysisDay());
 	}
 
 	public void insertAnalysisRecordHis(AnalysisRecord analysisRecord) {
-		String sql = "insert into analysis_record_his(analysis_day,status,error_step,error_step_desc,error_msg,error_code,create_time) values (?,?,?,?,?,?,NOW())";
+		String sql = "insert into analysis_record_his(analysis_day,status,error_step,error_step_desc,error_msg,error_code,analysis_batch_no,create_time) values (?,?,?,?,?,?,?,NOW())";
 		dbManager.getJdbcTemplate().update(sql,
 				new Object[] { analysisRecord.getAnalysisDay(), analysisRecord.getStatus(),
 						analysisRecord.getErrorStep(), analysisRecord.getErrorStepDesc(), analysisRecord.getErrorMsg(),
-						analysisRecord.getErrorCode() });
+						analysisRecord.getErrorCode(),analysisRecord.getAnalysisBatchNo() });
 	}
 
 	@Override

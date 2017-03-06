@@ -18,13 +18,13 @@ public class ConCludeTask {
 	DealInfoServiceImpl dealInfoServiceImpl;
 	@Resource
 	ConCludeSend conCludeSend;
-   public void execute(String dayStr)
+   public void execute(String dayStr,String batchNo)
    {
 	  //1.解析yyyymmdd_xxx(交易所代码)_clientInfoMod.txt				
 	  //2.发送数据
 	   try {
-		   dealInfoServiceImpl.execute(dayStr);
-		   conCludeSend.send();
+		   dealInfoServiceImpl.execute(dayStr,batchNo);
+		   conCludeSend.send(dayStr,batchNo);
 	   }catch (Exception e)
 	   {
 		   logger.error(e);

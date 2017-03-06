@@ -34,5 +34,9 @@ public class RetVo {
 	{
 		return new RetVo("0",msg);
 	}
+	public static RetVo getDoingRet(String msg)
+	{
+		return new RetVo("2",msg);
+	}
 
 }

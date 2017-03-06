@@ -18,13 +18,13 @@ public class SyncUserInfoTask {
 	ClientInfoModServiceImpl clientInfoModServiceImpl;
 	@Resource
 	SyncUserInfoSend syncUserInfoSend;
-   public void execute(String dayStr)
+   public void execute(String dayStr,String batchNo)
    {
 	  //1.解析yyyymmdd_xxx(交易所代码)_clientInfoMod.txt				
 	  //2.发送数据
 	   try {
-	   clientInfoModServiceImpl.execute(dayStr);
-	   syncUserInfoSend.send();
+	   clientInfoModServiceImpl.execute(dayStr,batchNo);
+	   syncUserInfoSend.send(dayStr,batchNo);
 	   }catch (Exception e)
 	   {
 		   logger.error(e);

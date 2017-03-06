@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -15,27 +17,41 @@ import org.springframework.util.CollectionUtils;
 import com.blockchain.service.customer.UserInfoSyncRequest;
 import com.blockchain.service.customer.domain.UserCoreInfo;
 import com.blockchain.service.customer.domain.UserInstInfo;
+import com.lef.checkaccount.Exception.AnalysisException;
+import com.lef.checkaccount.common.TaskCode;
 
 /**
  * 
- * @author lihongsong
- * 用户注册信息推送
+ * @author lihongsong 用户注册信息推送
  */
 @Component
 public class SyncUserInfoSend extends AbstractSend {
+	private static Log logger = LogFactory.getLog(SyncUserInfoSend.class);
 
-	public void send() {
-		List<UserInfoSyncRequest> list = findFromDb();
+	public void send(String dayStr, String batchNo) {
+		List<UserInfoSyncRequest> list = null;
+		try {
+			list = findFromDb( dayStr,  batchNo);
+		} catch (Exception e) {
+			logger.error(e);
+			throw new AnalysisException(TaskCode.find_data_fromdb_error_code, TaskCode.find_data_fromdb_error_msg, e);
+		}
 		if (!CollectionUtils.isEmpty(list)) {
 			for (UserInfoSyncRequest user : list) {
-				accountServiceClient.syncUserInfo(user);
+				try {
+					accountServiceClient.syncUserInfo(user);
+				} catch (Exception e) {
+					logger.error(e);
+					throw new AnalysisException(TaskCode.send_data_tohessian_error_code,
+							TaskCode.send_data_tohessian_error_msg, e);
+				}
 			}
 		}
 	}
 
-	public List<UserInfoSyncRequest> findFromDb() {
-		String sql = "select * from clientinfomod";
-		return dbManager.getJdbcTemplate().query(sql, new RowMapper() {
+	public List<UserInfoSyncRequest> findFromDb(String dayStr, String batchNo) {
+		String sql = "select * from clientinfomod where analysis_date=? and analysis_batch_no=?";
+		return dbManager.getJdbcTemplate().query(sql, new Object[]{dayStr,batchNo},new RowMapper() {
 			@Override
 			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 				UserInfoSyncRequest user = new UserInfoSyncRequest();

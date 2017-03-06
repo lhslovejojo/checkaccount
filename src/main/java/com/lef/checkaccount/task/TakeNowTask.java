@@ -19,12 +19,12 @@ public class TakeNowTask {
 	@Resource
 	TakeNowSend takeNowSend;
 
-	public void execute(String dayStr) {
+	public void execute(String dayStr,String batchNo) {
 		// 1.解析yyyymmdd_xxx(交易所代码)_clientInfoMod.txt
 		// 2.发送数据
 		try {
-			bankCheckServiceImpl.execute(dayStr);
-			takeNowSend.send();
+			bankCheckServiceImpl.execute(dayStr,batchNo);
+			takeNowSend.send(dayStr,batchNo);
 		} catch (Exception e) {
 			logger.error(e);
 			throw new AnalysisException(TaskCode.analysis_data_error_code, TaskCode.analysis_data_error_001,

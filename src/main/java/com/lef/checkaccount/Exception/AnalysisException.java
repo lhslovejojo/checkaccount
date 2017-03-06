@@ -16,6 +16,7 @@ public class AnalysisException extends RuntimeException {
 	public AnalysisException() {
 		super();
 	}
+
 	public AnalysisException(Throwable e) {
 		super(e);
 	}
@@ -29,18 +30,36 @@ public class AnalysisException extends RuntimeException {
 		super();
 		this.retCd = retCd;
 		this.msgDes = msgDes;
-		this.errorTask=errorTask;
+		this.errorTask = errorTask;
 	}
+
 	public AnalysisException(String retCd, String msgDes) {
 		super();
 		this.retCd = retCd;
 		this.msgDes = msgDes;
 	}
-	public AnalysisException(String retCd, String msgDes,int errorTask,Throwable e) {
+
+	public AnalysisException(String retCd, String msgDes, int errorTask, Throwable e) {
 		super(e);
-		this.retCd = retCd;
-		this.msgDes = msgDes;
-		this.errorTask=errorTask;
+		if (e instanceof AnalysisException) {
+			this.retCd = ((AnalysisException) e).getRetCd();
+			this.msgDes = ((AnalysisException) e).getMsgDes();
+		} else {
+			this.retCd = retCd;
+			this.msgDes = msgDes;
+		}
+		this.errorTask = errorTask;
+	}
+
+	public AnalysisException(String retCd, String msgDes, Throwable e) {
+		super(e);
+		if (e instanceof AnalysisException) {
+			this.retCd = ((AnalysisException) e).getRetCd();
+			this.msgDes = ((AnalysisException) e).getMsgDes();
+		} else {
+			this.retCd = retCd;
+			this.msgDes = msgDes;
+		}
 	}
 
 	public String getRetCd() {

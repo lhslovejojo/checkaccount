@@ -2,38 +2,65 @@ package com.lef.checkaccount.send;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Resource;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.blockchain.service.tran.ConCludeRequest;
+import com.lef.checkaccount.Exception.AnalysisException;
+import com.lef.checkaccount.common.TaskCode;
+import com.lef.checkaccount.utils.CodeUtil;
 import com.lef.checkaccount.utils.NumberUtil;
+
 /**
  * 客户交易成交记录推送
+ * 
  * @author lihongsong
  *
  */
 @Component
 public class ConCludeSend extends AbstractSend {
+	private static Log logger = LogFactory.getLog(ConCludeSend.class);
 
-	public void send() {
-		List<ConCludeRequest> list = findFromDb();
+	@Resource
+	CodeUtil codeUtil;
+
+	public void send(String dayStr, String batchNo) {
+		List<ConCludeRequest> list = null;
+		try {
+			list = findFromDb(dayStr, batchNo);
+		} catch (Exception e) {
+			logger.error(e);
+			throw new AnalysisException(TaskCode.find_data_fromdb_error_code, TaskCode.find_data_fromdb_error_msg, e);
+		}
 		if (!CollectionUtils.isEmpty(list)) {
 			for (ConCludeRequest request : list) {
-				txnServiceClient.conClude(request);
+				try {
+					request.setRequestTime(new Date());
+					request.setRequestId(codeUtil.getSysRequestId(TaskCode.code_conclude_type));// 交易成交请求流水号
+					txnServiceClient.conClude(request);
+				} catch (Exception e) {
+					logger.error(e);
+					throw new AnalysisException(TaskCode.send_data_tohessian_error_code,
+							TaskCode.send_data_tohessian_error_msg, e);
+				}
 			}
 		}
 	}
-	public List<ConCludeRequest> findFromDb() {
-		String sql = "select * from dealinfo";
-		return dbManager.getJdbcTemplate().query(sql, new RowMapper() {
+
+	public List<ConCludeRequest> findFromDb(String dayStr, String batchNo) {
+		String sql = "select * from dealinfo where analysis_date=? and analysis_batch_no=?";
+		return dbManager.getJdbcTemplate().query(sql, new Object[]{dayStr,batchNo}, new RowMapper() {
 			@Override
 			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 				ConCludeRequest request = new ConCludeRequest();
-				// request.setRequestTime(new Date());
-				// request.setRequestId(requestId);
 				request.setBusiNo(rs.getString("deal_id"));
 				request.setExchangeId(rs.getString("exchange_id"));
 				request.setExchangeMarketType(rs.getString("exchange_market_type"));
@@ -46,23 +73,23 @@ public class ConCludeSend extends AbstractSend {
 
 				request.setOppFundAccount(rs.getString("opp_fund_account"));
 				request.setOppTradeAccount(rs.getString("opp_trade_account"));
-//				request.setMoneyType(moneyType);(rs.getString("bank_no"));
+				request.setMoneyType("CNY");
 				request.setProductCode(rs.getString("product_code"));
 				request.setProductCategoryId(rs.getString("product_category_id"));
 				request.setTradeType(rs.getString("trade_type"));
 				request.setBusiDate(rs.getString("init_date"));
-				request.setBusiTime(request.getBusiDate()+rs.getString("deal_time"));
+				request.setBusiTime(request.getBusiDate() + rs.getString("deal_time"));
 				request.setTradeDir(rs.getString("trade_dir"));
 				request.setDealType(rs.getString("deal_type"));
 				request.setOppDealType(rs.getString("opp_deal_type"));
-//				request.setOrderWay(rs.getString("trade_type"));
-//				request.setDepositWay(rs.getString("deposit_type"));
+				 request.setOrderWay("Z");
+				// request.setDepositWay(rs.getString("deposit_type"));
 				request.setOrderPrice(NumberUtil.getLongFromStr(rs.getString("deal_price")));
 				request.setHoldPrice(NumberUtil.getLongFromStr(rs.getString("hold_price")));
 				request.setOrderQuantity(NumberUtil.getIntegerFromStr(rs.getString("deal_quantity")));
 				request.setDealTotalPrice(NumberUtil.getLongFromStr(rs.getString("deal_total_price")));
 				request.setDepositRate(NumberUtil.getDoubleFromStr(rs.getString("deposit_rate")));
-				
+
 				request.setDepositRatioType(rs.getString("deposit_ratio_type"));
 				request.setDepositType(rs.getString("deposit_type"));
 				request.setDepositBalance(NumberUtil.getLongFromStr(rs.getString("deposit_balance")));

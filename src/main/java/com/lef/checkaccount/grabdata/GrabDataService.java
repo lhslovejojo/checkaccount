@@ -9,16 +9,16 @@ public interface GrabDataService {
     /*
      * 根据DayStr解析某一天的对账文件
      */
-	public void execute(String dayStr);
+	public void execute(String dayStr,String batchNo);
 	/**
 	 * 解析文件
 	 * @param file
 	 */
-	public void analysis(File file);
+	public void analysis(File file,String dayStr, String batchNo);
 	/**
 	 * 处理解析的数据
 	 * @param list
 	 * @return
 	 */
-	public RetVo handle(List<String[]> list);
+	public RetVo handle(List<String[]> list,String dayStr, String batchNo);
 }
