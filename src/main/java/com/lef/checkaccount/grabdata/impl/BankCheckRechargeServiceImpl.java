@@ -17,15 +17,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.lef.checkaccount.Exception.AnalysisException;
-import com.lef.checkaccount.common.TaskCode;
+import com.lef.checkaccount.common.Constants;
 import com.lef.checkaccount.grabdata.AbstractAnalysisService;
 import com.lef.checkaccount.grabdata.GrabDataService;
 import com.lef.checkaccount.utils.DbManager;
 import com.lef.checkaccount.vo.RetVo;
-
+/**
+ * 银行出入金对账文件-只解析入金；
+ * @author lihongsong
+ *
+ */
 @Service
-public class BankCheckServiceImpl extends AbstractAnalysisService implements GrabDataService {
-	private static Log logger = LogFactory.getLog(BankCheckServiceImpl.class);
+public class BankCheckRechargeServiceImpl extends AbstractAnalysisService implements GrabDataService {
+	private static Log logger = LogFactory.getLog(BankCheckRechargeServiceImpl.class);
 	@Value("${grabdata.BankCheck.tableName}")
 	private String tableName;
 	@Value("${grabdata.BankCheck.fileExpression}")
@@ -56,7 +60,7 @@ public class BankCheckServiceImpl extends AbstractAnalysisService implements Gra
 		dbManager.executeSql(dataToSql(list, dayStr,  batchNo));
 		}catch (Exception e)
 		{
-			throw new AnalysisException(TaskCode.insert_data_error_code,TaskCode.insert_data_error_msg,e);
+			throw new AnalysisException(Constants.insert_data_error_code,Constants.insert_data_error_msg,e);
 		}
 		list.clear();
 		return RetVo.getSuccessRet();
@@ -80,7 +84,10 @@ public class BankCheckServiceImpl extends AbstractAnalysisService implements Gra
 				// 解析行数据
 				if (StringUtils.isNotEmpty(rowData)) {
 					String[] oneData = rowData.split("\\|",-1);
-					dataList.add(oneData);
+					if ("1".equals(oneData[7])) // 出入金类型（0-出金1-入金）
+					{
+						dataList.add(oneData);
+					}
 					if (dataList.size() == maxLine) {
 						handle(dataList,  dayStr,  batchNo);
 					}
@@ -89,7 +96,7 @@ public class BankCheckServiceImpl extends AbstractAnalysisService implements Gra
 			handle(dataList,  dayStr,  batchNo);
 		} catch (Exception e) {
 			logger.error("解析银行对账文件时出现异常", e);
-			throw new AnalysisException(TaskCode.analysis_data_error_code,TaskCode.analysis_data_error_001,e);
+			throw new AnalysisException(Constants.analysis_data_error_code,Constants.analysis_data_error_001,e);
 		} finally {
 			if (bufferedReader != null) {
 				try {

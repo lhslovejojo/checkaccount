@@ -15,7 +15,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.blockchain.service.tran.TollRequest;
 import com.lef.checkaccount.Exception.AnalysisException;
-import com.lef.checkaccount.common.TaskCode;
+import com.lef.checkaccount.common.Constants;
 import com.lef.checkaccount.utils.CodeUtil;
 import com.lef.checkaccount.utils.NumberUtil;
 
@@ -37,18 +37,18 @@ public class TollSend extends AbstractSend {
 			list = findFromDb(dayStr, batchNo);
 		} catch (Exception e) {
 			logger.error(e);
-			throw new AnalysisException(TaskCode.find_data_fromdb_error_code, TaskCode.find_data_fromdb_error_msg, e);
+			throw new AnalysisException(Constants.find_data_fromdb_error_code, Constants.find_data_fromdb_error_msg, e);
 		}
 		if (!CollectionUtils.isEmpty(list)) {
 			for (TollRequest request : list) {
 				try {
 					request.setRequestTime(new Date());
-					request.setRequestId(codeUtil.getSysRequestId(TaskCode.code_toll_type));// 交易所收费单请求流水号
+					request.setRequestId(codeUtil.getSysRequestId(Constants.code_toll_type));// 交易所收费单请求流水号
 					txnServiceClient.toll(request);
 				} catch (Exception e) {
 					logger.error(e);
-					throw new AnalysisException(TaskCode.send_data_tohessian_error_code,
-							TaskCode.send_data_tohessian_error_msg, e);
+					throw new AnalysisException(Constants.send_data_tohessian_error_code,
+							Constants.send_data_tohessian_error_msg, e);
 				}
 			}
 		}

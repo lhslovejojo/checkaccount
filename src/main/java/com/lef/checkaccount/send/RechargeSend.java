@@ -13,9 +13,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.blockchain.service.tran.ConCludeRequest;
 import com.blockchain.service.tran.RechargeRequest;
+import com.blockchain.service.tran.TranResponse;
 import com.lef.checkaccount.Exception.AnalysisException;
-import com.lef.checkaccount.common.TaskCode;
+import com.lef.checkaccount.common.Constants;
 import com.lef.checkaccount.utils.CodeUtil;
 import com.lef.checkaccount.utils.NumberUtil;
 
@@ -37,18 +39,23 @@ public class RechargeSend extends AbstractSend {
 			list = findFromDb(dayStr, batchNo);
 		} catch (Exception e) {
 			logger.error(e);
-			throw new AnalysisException(TaskCode.find_data_fromdb_error_code, TaskCode.find_data_fromdb_error_msg, e);
+			throw new AnalysisException(Constants.find_data_fromdb_error_code, Constants.find_data_fromdb_error_msg, e);
 		}
 		if (!CollectionUtils.isEmpty(list)) {
 			for (RechargeRequest request : list) {
+				TranResponse response = null;
+				String errorMsg = null;
 				try {
 					request.setRequestTime(new Date());
-					request.setRequestId(codeUtil.getSysRequestId(TaskCode.code_recharge_type));// 入金请求流水号
-					txnServiceClient.recharge(request);
+					request.setRequestId(codeUtil.getSysRequestId(Constants.code_recharge_type));// 入金请求流水号
+					response=txnServiceClient.recharge(request);
 				} catch (Exception e) {
+					errorMsg=Constants.send_data_tohessian_error_msg;
 					logger.error(e);
-					throw new AnalysisException(TaskCode.send_data_tohessian_error_code,
-							TaskCode.send_data_tohessian_error_msg, e);
+					throw new AnalysisException(Constants.send_data_tohessian_error_code,
+							Constants.send_data_tohessian_error_msg, e);
+				} finally {
+					updateSendResult(dayStr, batchNo, request, response, errorMsg);
 				}
 			}
 		}
@@ -64,7 +71,7 @@ public class RechargeSend extends AbstractSend {
 				request.setTradeSerialNo(rs.getString("trade_serial_no"));
 				request.setSystemCode(rs.getString("exchange_id"));
 				request.setBusiDate(rs.getString("init_date"));
-				request.setBusiType("Recharge"); //自定义
+				request.setBusiType("Recharge"); // 自定义
 
 				request.setMemCode(rs.getString("mem_code"));
 				request.setFundAccountClear(rs.getString("fund_account"));
@@ -77,5 +84,18 @@ public class RechargeSend extends AbstractSend {
 				return request;
 			}
 		});
+	}
+	private void updateSendResult(String dayStr, String batchNo, RechargeRequest request, TranResponse response,
+			String errorMsg) {
+		String responseCode = null;
+		String responseDesc = null;
+		if (response != null) {
+			responseCode = response.getResponseCode();
+			responseDesc = response.getResponseDesc();
+		}
+		dbManager.getJdbcTemplate().update(
+				"update bankcheck  set response_code=?,response_desc=?,send_time=?,send_request_id=?,send_error_msg=? where analysis_date=? and analysis_batch_no=? and serial_no=?",
+				new Object[] { responseCode, responseDesc, request.getRequestTime(), request.getRequestId(), errorMsg,
+						dayStr, batchNo, request.getSerialNo() });
 	}
 }

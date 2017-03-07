@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.lef.checkaccount.Exception.AnalysisException;
-import com.lef.checkaccount.common.TaskCode;
+import com.lef.checkaccount.common.Constants;
 import com.lef.checkaccount.grabdata.AbstractAnalysisService;
 import com.lef.checkaccount.grabdata.GrabDataService;
 import com.lef.checkaccount.vo.RetVo;
@@ -89,7 +89,7 @@ public class DealInfoServiceImpl extends AbstractAnalysisService implements Grab
 			handle(dataList,  dayStr,  batchNo);
 		} catch (Exception e) {
 			logger.error("解析银行对账文件时出现异常", e);
-			throw new AnalysisException(TaskCode.analysis_data_error_code,TaskCode.analysis_data_error_001);
+			throw new AnalysisException(Constants.analysis_data_error_code,Constants.analysis_data_error_001);
 		} finally {
 			if (bufferedReader != null) {
 				try {

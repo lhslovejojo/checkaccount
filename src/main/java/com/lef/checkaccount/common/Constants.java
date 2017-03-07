@@ -3,12 +3,13 @@ package com.lef.checkaccount.common;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TaskCode {
+public class Constants {
  public static final int task_sync_user_step=1;
  public static final int task_recharge_step=2;
  public static final int task_conclude_step=3;
  public static final int task_takenow_step=4;
  public static final int task_toll_step=5;
+ public static final int position_toll_step=6;
  public static final Map<Integer,String> task_step_dec_map=new HashMap<Integer,String>();
  public static final String analysis_data_error_code="001";
  public static final String analysis_data_error_001="文件解析失败";
@@ -34,6 +35,7 @@ public class TaskCode {
 	 task_step_dec_map.put(task_conclude_step, "同步客户成交信息") ;
 	 task_step_dec_map.put(task_takenow_step, "同步客户出金信息") ;
 	 task_step_dec_map.put(task_toll_step, "同步收费单信息") ;
+	 task_step_dec_map.put(position_toll_step, "同步持仓信息") ;
 	 
  }
 }

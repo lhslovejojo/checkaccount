@@ -8,27 +8,33 @@ import org.springframework.stereotype.Component;
 
 import com.lef.checkaccount.Exception.AnalysisException;
 import com.lef.checkaccount.common.Constants;
-import com.lef.checkaccount.grabdata.impl.BankCheckRechargeServiceImpl;
-import com.lef.checkaccount.send.RechargeSend;
+import com.lef.checkaccount.grabdata.impl.MemberPositionDetailServiceImpl;
+import com.lef.checkaccount.send.PositionSend;
 
+/**
+ * 持仓明细推送任务
+ * 
+ * @author lihongsong
+ *
+ */
 @Component
-public class RechargeTask {
-	private static Log logger = LogFactory.getLog(RechargeTask.class);
+public class PositionTask {
+	private static Log logger = LogFactory.getLog(PositionTask.class);
 	@Resource
-	BankCheckRechargeServiceImpl bankCheckRechargeServiceImpl;
+	MemberPositionDetailServiceImpl memberPositionDetailServiceImpl;
 	@Resource
-	RechargeSend rechargeSend;
+	PositionSend positionSend;
 
 	public void execute(String dayStr, String batchNo) {
-		// 1.解析yyyymmdd_xxx(交易所代码)_yyy(银行产品代码)_bankCheck.txt 中入金记录
+		// 1.解析yyyymmdd_xxx(交易所代码)_clientInfoMod.txt
 		// 2.发送数据
 		try {
-			bankCheckRechargeServiceImpl.execute(dayStr, batchNo);
-			rechargeSend.send(dayStr, batchNo);
+			memberPositionDetailServiceImpl.execute(dayStr, batchNo);
+			positionSend.send(dayStr, batchNo);
 		} catch (Exception e) {
 			logger.error(e);
 			throw new AnalysisException(Constants.analysis_data_error_code, Constants.analysis_data_error_001,
-					Constants.task_recharge_step, e);
+					Constants.position_toll_step, e);
 		}
 	}
 }

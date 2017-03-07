@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,43 +20,48 @@ import com.lef.checkaccount.Exception.AnalysisException;
 import com.lef.checkaccount.common.Constants;
 import com.lef.checkaccount.grabdata.AbstractAnalysisService;
 import com.lef.checkaccount.grabdata.GrabDataService;
+import com.lef.checkaccount.utils.DbManager;
 import com.lef.checkaccount.vo.RetVo;
 
 /**
- * 外部费用明细文件 yyyymmdd_xxx(交易所代码)_memberFee.txt
+ * 银行出入金对账文件-只解析出金
  * 
  * @author lihongsong
  *
  */
 @Service
-public class MemberFeeServiceImpl extends AbstractAnalysisService implements GrabDataService {
-
-	private static Log logger = LogFactory.getLog(MemberFeeServiceImpl.class);
-	@Value("${grabdata.MemberFee.tableName}")
+public class BankCheckTakeNowServiceImpl extends AbstractAnalysisService implements GrabDataService {
+	private static Log logger = LogFactory.getLog(BankCheckTakeNowServiceImpl.class);
+	@Value("${grabdata.BankCheck.tableName}")
 	private String tableName;
-	@Value("${grabdata.MemberFee.fileExpression}")
+	@Value("${grabdata.BankCheck.fileExpression}")
 	private String fileExpression;
+	@Resource
+	DbManager dbManager;
 
 	public void execute(String dayStr, String batchNo) {
 		// TODO Auto-generated method stub
 		super.getFileFromFtp(dayStr, fileExpression);
 		File fileDirFile = new File(ftpToLocalDir);
-		File[] files=fileDirFile.listFiles();
-		if (files!=null && files.length>0)
-		{
-		sortFileArrayByName(files);
-		for (File file : fileDirFile.listFiles()) {
-			if (isAnalysisFile(file.getName(), dayStr + fileExpression)) {
-				analysis(file, dayStr, batchNo);
-				return ;
+		File[] files = fileDirFile.listFiles();
+		if (files != null && files.length > 0) {
+			sortFileArrayByName(files);
+			for (File file : fileDirFile.listFiles()) {
+				if (isAnalysisFile(file.getName(), dayStr + fileExpression)) {
+					analysis(file, dayStr, batchNo);
+					return;
+				}
 			}
-		}
 		}
 
 	}
 
 	public RetVo handle(List<String[]> list, String dayStr, String batchNo) {
-		dbManager.executeSql(dataToSql(list, dayStr, batchNo));
+		try {
+			dbManager.executeSql(dataToSql(list, dayStr, batchNo));
+		} catch (Exception e) {
+			throw new AnalysisException(Constants.insert_data_error_code, Constants.insert_data_error_msg, e);
+		}
 		list.clear();
 		return RetVo.getSuccessRet();
 	}
@@ -66,7 +73,9 @@ public class MemberFeeServiceImpl extends AbstractAnalysisService implements Gra
 			// 读取文件
 			bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file), this.charset));
 			if (bufferedReader == null) {
-				logger.info("银行对账文件为空");
+				if (logger.isInfoEnabled()) {
+					logger.info("银行对账文件为空");
+				}
 				return;
 			}
 			// 遍历解析行数据
@@ -76,7 +85,10 @@ public class MemberFeeServiceImpl extends AbstractAnalysisService implements Gra
 				// 解析行数据
 				if (StringUtils.isNotEmpty(rowData)) {
 					String[] oneData = rowData.split("\\|", -1);
-					dataList.add(oneData);
+					if ("0".equals(oneData[7])) // 出入金类型（0-出金1-入金）
+					{
+						dataList.add(oneData);
+					}
 					if (dataList.size() == maxLine) {
 						handle(dataList, dayStr, batchNo);
 					}
@@ -85,7 +97,7 @@ public class MemberFeeServiceImpl extends AbstractAnalysisService implements Gra
 			handle(dataList, dayStr, batchNo);
 		} catch (Exception e) {
 			logger.error("解析银行对账文件时出现异常", e);
-			throw new AnalysisException(Constants.analysis_data_error_code, Constants.analysis_data_error_001);
+			throw new AnalysisException(Constants.analysis_data_error_code, Constants.analysis_data_error_001, e);
 		} finally {
 			if (bufferedReader != null) {
 				try {
@@ -101,13 +113,13 @@ public class MemberFeeServiceImpl extends AbstractAnalysisService implements Gra
 		List<String> sqlList = new ArrayList<String>();
 		if (dataList != null && dataList.size() > 0) {
 			StringBuffer insertSql = new StringBuffer("insert into " + tableName
-					+ " (create_time,analysis_date,analysis_batch_no, init_date, serial_no, exchange_id, exchange_market_type, biz_type, exchange_fees_type, fees_balance, payer_mem_code,payee_fund_account, payer_fund_account, payee_mem_code, related_bill_type, related_bill_no, remark, busi_datetime)  values ");
+					+ " (create_time,analysis_date,analysis_batch_no,serial_no, trade_serial_no, init_date, exchange_id, mem_code, fund_account, inout_way, inout_type, inout_source, occur_amount, money_type, bank_no, bank_pro_code, bank_account, deal_status, remark) values ");
 			for (String[] oneData : dataList) {
 				if (oneData != null) {
 					insertSql.append("(");
 					insertSql.append("NOW(),");
-					insertSql.append("'"+dayStr+"',");
-					insertSql.append("'"+batchNo+"',");
+					insertSql.append("'" + dayStr + "',");
+					insertSql.append("'" + batchNo + "',");
 					insertSql.append("'" + oneData[0] + "',");
 					insertSql.append("'" + oneData[1] + "',");
 					insertSql.append("'" + oneData[2] + "',");
@@ -122,7 +134,8 @@ public class MemberFeeServiceImpl extends AbstractAnalysisService implements Gra
 					insertSql.append("'" + oneData[11] + "',");
 					insertSql.append("'" + oneData[12] + "',");
 					insertSql.append("'" + oneData[13] + "',");
-					insertSql.append("'" + oneData[14] + "'");
+					insertSql.append("'" + oneData[14] + "',");
+					insertSql.append("'" + oneData[15] + "'");
 					insertSql.append("),");
 				}
 			}
@@ -131,4 +144,5 @@ public class MemberFeeServiceImpl extends AbstractAnalysisService implements Gra
 		return sqlList;
 
 	}
+
 }

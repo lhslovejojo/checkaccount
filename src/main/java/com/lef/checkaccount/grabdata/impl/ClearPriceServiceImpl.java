@@ -17,7 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
 
 import com.lef.checkaccount.Exception.AnalysisException;
-import com.lef.checkaccount.common.TaskCode;
+import com.lef.checkaccount.common.Constants;
 import com.lef.checkaccount.grabdata.AbstractAnalysisService;
 import com.lef.checkaccount.grabdata.GrabDataService;
 import com.lef.checkaccount.utils.DbManager;
@@ -69,7 +69,7 @@ public class ClearPriceServiceImpl extends AbstractAnalysisService implements Gr
 			handle(dataList,  dayStr,  batchNo);
 		} catch (Exception e) {
 			logger.error("解析银行对账文件时出现异常", e);
-			throw new AnalysisException(TaskCode.analysis_data_error_code,TaskCode.analysis_data_error_001);
+			throw new AnalysisException(Constants.analysis_data_error_code,Constants.analysis_data_error_001);
 		} finally {
 			if (bufferedReader != null) {
 				try {

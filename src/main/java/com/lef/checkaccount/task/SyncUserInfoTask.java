@@ -7,7 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.lef.checkaccount.Exception.AnalysisException;
-import com.lef.checkaccount.common.TaskCode;
+import com.lef.checkaccount.common.Constants;
 import com.lef.checkaccount.grabdata.impl.ClientInfoModServiceImpl;
 import com.lef.checkaccount.send.SyncUserInfoSend;
 
@@ -28,7 +28,7 @@ public class SyncUserInfoTask {
 	   }catch (Exception e)
 	   {
 		   logger.error(e);
-		   throw new AnalysisException(TaskCode.analysis_data_error_code,TaskCode.analysis_data_error_001,TaskCode.task_sync_user_step,e);
+		   throw new AnalysisException(Constants.analysis_data_error_code,Constants.analysis_data_error_001,Constants.task_sync_user_step,e);
 	   }
    }
 }

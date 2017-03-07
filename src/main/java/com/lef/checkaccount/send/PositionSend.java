@@ -15,7 +15,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.blockchain.service.tran.PositionRequest;
 import com.lef.checkaccount.Exception.AnalysisException;
-import com.lef.checkaccount.common.TaskCode;
+import com.lef.checkaccount.common.Constants;
 import com.lef.checkaccount.utils.CodeUtil;
 import com.lef.checkaccount.utils.NumberUtil;
 
@@ -37,18 +37,18 @@ public class PositionSend extends AbstractSend {
 			list = findFromDb(dayStr, batchNo);
 		} catch (Exception e) {
 			logger.error(e);
-			throw new AnalysisException(TaskCode.find_data_fromdb_error_code, TaskCode.find_data_fromdb_error_msg, e);
+			throw new AnalysisException(Constants.find_data_fromdb_error_code, Constants.find_data_fromdb_error_msg, e);
 		}
 		if (!CollectionUtils.isEmpty(list)) {
 			for (PositionRequest request : list) {
 				try {
 					request.setRequestTime(new Date());
-					request.setRequestId(codeUtil.getSysRequestId(TaskCode.code_position_type));// 持仓明细请求流水号
+					request.setRequestId(codeUtil.getSysRequestId(Constants.code_position_type));// 持仓明细请求流水号
 					txnServiceClient.position(request);
 				} catch (Exception e) {
 					logger.error(e);
-					throw new AnalysisException(TaskCode.send_data_tohessian_error_code,
-							TaskCode.send_data_tohessian_error_msg, e);
+					throw new AnalysisException(Constants.send_data_tohessian_error_code,
+							Constants.send_data_tohessian_error_msg, e);
 				}
 			}
 		}
@@ -71,7 +71,7 @@ public class PositionSend extends AbstractSend {
 				request.setTradeDir(rs.getString("trade_dir"));
 				request.setDepositWay(rs.getString("deposit_way"));
 				request.setOrderPrice(NumberUtil.getLongFromStr(rs.getString("open_price")));
-				request.setHoldPrice(NumberUtil.getIntegerFromStr(rs.getString("holdPrice")));
+				request.setHoldPrice(NumberUtil.getIntegerFromStr(rs.getString("hold_price")));
 				request.setOrderQuantity(NumberUtil.getIntegerFromStr(rs.getString("deal_quantity")));
 				request.setDealTotalPrice(rs.getString("left_quantity"));
 				request.setPresentUnit(rs.getString("present_unit"));

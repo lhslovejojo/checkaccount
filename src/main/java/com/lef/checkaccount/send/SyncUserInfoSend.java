@@ -6,6 +6,7 @@ package com.lef.checkaccount.send;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -14,11 +15,12 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.blockchain.service.customer.CustomerResponse;
 import com.blockchain.service.customer.UserInfoSyncRequest;
 import com.blockchain.service.customer.domain.UserCoreInfo;
 import com.blockchain.service.customer.domain.UserInstInfo;
 import com.lef.checkaccount.Exception.AnalysisException;
-import com.lef.checkaccount.common.TaskCode;
+import com.lef.checkaccount.common.Constants;
 
 /**
  * 
@@ -34,20 +36,29 @@ public class SyncUserInfoSend extends AbstractSend {
 			list = findFromDb( dayStr,  batchNo);
 		} catch (Exception e) {
 			logger.error(e);
-			throw new AnalysisException(TaskCode.find_data_fromdb_error_code, TaskCode.find_data_fromdb_error_msg, e);
+			throw new AnalysisException(Constants.find_data_fromdb_error_code, Constants.find_data_fromdb_error_msg, e);
 		}
 		if (!CollectionUtils.isEmpty(list)) {
 			for (UserInfoSyncRequest user : list) {
+				CustomerResponse customerResponse=null;
+				String errorMsg=null;
+				Date sendDate=new Date();
 				try {
-					accountServiceClient.syncUserInfo(user);
+					 customerResponse=accountServiceClient.syncUserInfo(user);
 				} catch (Exception e) {
 					logger.error(e);
-					throw new AnalysisException(TaskCode.send_data_tohessian_error_code,
-							TaskCode.send_data_tohessian_error_msg, e);
+					errorMsg=Constants.send_data_tohessian_error_msg;
+					throw new AnalysisException(Constants.send_data_tohessian_error_code,
+							Constants.send_data_tohessian_error_msg, e);
+				}
+				finally
+				{
+					updateSendResult(dayStr,batchNo,user.getSerial_no(),customerResponse,errorMsg,sendDate);
 				}
 			}
 		}
 	}
+	
 
 	public List<UserInfoSyncRequest> findFromDb(String dayStr, String batchNo) {
 		String sql = "select * from clientinfomod where analysis_date=? and analysis_batch_no=?";
@@ -98,5 +109,16 @@ public class SyncUserInfoSend extends AbstractSend {
 				return user;
 			}
 		});
+	}
+	private void updateSendResult(String dayStr, String batchNo,String serialNo,CustomerResponse customerResponse,String errorMsg,Date sendDate)
+	{
+		 String responseCode=null;
+		 String responseDesc=null;
+		if (customerResponse!=null)
+		{
+			responseCode=customerResponse.getResponseCode();
+			responseDesc=customerResponse.getResponseDesc();
+		}
+		dbManager.getJdbcTemplate().update("update clientinfomod  set response_code=?,response_desc=?,send_time=?,send_error_msg=? where analysis_date=? and analysis_batch_no=? and serial_no=?", new Object[]{responseCode,responseDesc,sendDate,errorMsg,dayStr,batchNo,serialNo});
 	}
 }

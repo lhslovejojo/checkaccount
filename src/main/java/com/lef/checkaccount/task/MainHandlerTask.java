@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
 import com.lef.checkaccount.Exception.AnalysisException;
-import com.lef.checkaccount.common.TaskCode;
+import com.lef.checkaccount.common.Constants;
 import com.lef.checkaccount.entity.AnalysisRecord;
 import com.lef.checkaccount.service.AnalysisRecordService;
 import com.lef.checkaccount.utils.DateUtil;
@@ -32,6 +32,8 @@ public class MainHandlerTask {
 	@Resource
 	TollTask tollTask;
 	@Resource
+	PositionTask positionTask;
+	@Resource
 	DbManager dbManager;
 	@Resource
 	AnalysisRecordService analysisRecordService;
@@ -39,7 +41,7 @@ public class MainHandlerTask {
 	public RetVo execute(String dayStr) {
 		int step = 1;
 		AnalysisRecord analysisRecord = analysisRecordService.findByDay(dayStr);
-		if (analysisRecord != null && analysisRecord.getStatus().equals(TaskCode.task_status_doing)) {
+		if (analysisRecord != null && analysisRecord.getStatus().equals(Constants.task_status_doing)) {
 			return RetVo.getDoingRet(dayStr + "日期的文件处理中，请稍后");
 		}
 		if (analysisRecord != null) {
@@ -52,34 +54,34 @@ public class MainHandlerTask {
 			analysisRecord = new AnalysisRecord();
 		}
 		analysisRecord.setAnalysisDay(dayStr);
-		analysisRecord.setStatus(TaskCode.task_status_doing);
+		analysisRecord.setStatus(Constants.task_status_doing);
 		String batchNo=DateUtil.DateToString(new Date(), "yyyyMMddHHmmss");
 		logger.info("analysis batch-no:"+batchNo);
 		analysisRecord.setAnalysisBatchNo(batchNo);
 		analysisRecord = analysisRecordService.saveAnalysisRecord(analysisRecord);
 		try {
 			switch (step) {
-			case 1:
-				syncUserInfoTask.execute(dayStr,batchNo); // 同步用户注册信息
-			case 2:
-				rechargeTask.execute(dayStr,batchNo); // 入金
-			case 3:
-				conCludeTask.execute(dayStr,batchNo); // 客户成交单
-			case 4:
-				takeNowTask.execute(dayStr,batchNo); // 出金
+//			case 1:
+//				syncUserInfoTask.execute(dayStr,batchNo); // 同步用户注册信息
+//			case 2:
+//				rechargeTask.execute(dayStr,batchNo); // 入金
+//			case 3:
+//				conCludeTask.execute(dayStr,batchNo); // 客户成交单
+//			case 4:
+//				takeNowTask.execute(dayStr,batchNo); // 出金
 			case 5:
 				tollTask.execute(dayStr,batchNo); // 交易所收费单
-				// case 6: rechargeTask.execute(dayStr); //持仓清算文件
+//			case 6:
+//				positionTask.execute(dayStr,batchNo); // 持仓清算文件
 			default:
 				break;
 			}
-
-			analysisRecord.setStatus(TaskCode.task_status_success);
+			analysisRecord.setStatus(Constants.task_status_success);
 			analysisRecordService.saveAnalysisRecord(analysisRecord);
 			return RetVo.getSuccessRet();
 		} catch (AnalysisException e) {
 			 saveException(analysisRecord, e);
-			 return RetVo.getFailRet(TaskCode.task_step_dec_map.get(e.getErrorTask())+"失败");
+			 return RetVo.getFailRet(Constants.task_step_dec_map.get(e.getErrorTask())+"失败");
 		} finally {
 			analysisRecord = analysisRecordService.findByDay(dayStr);
 			analysisRecordService.insertAnalysisRecordHis(analysisRecord);
@@ -95,9 +97,9 @@ public class MainHandlerTask {
 	public AnalysisRecord saveException(AnalysisRecord analysisRecord, AnalysisException e) {
 		analysisRecord.setErrorCode(e.getRetCd());
 		analysisRecord.setErrorStep(e.getErrorTask());
-		analysisRecord.setErrorStepDesc(TaskCode.task_step_dec_map.get(e.getErrorTask()));
+		analysisRecord.setErrorStepDesc(Constants.task_step_dec_map.get(e.getErrorTask()));
 		analysisRecord.setErrorMsg(e.getMsgDes());
-		analysisRecord.setStatus(TaskCode.task_status_fail);
+		analysisRecord.setStatus(Constants.task_status_fail);
 		return analysisRecordService.saveAnalysisRecord(analysisRecord);
 	}
 }

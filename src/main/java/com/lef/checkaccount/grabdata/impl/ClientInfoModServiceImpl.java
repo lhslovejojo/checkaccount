@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.lef.checkaccount.Exception.AnalysisException;
-import com.lef.checkaccount.common.TaskCode;
+import com.lef.checkaccount.common.Constants;
 import com.lef.checkaccount.grabdata.AbstractAnalysisService;
 import com.lef.checkaccount.grabdata.GrabDataService;
 import com.lef.checkaccount.vo.RetVo;
@@ -39,23 +39,27 @@ public class ClientInfoModServiceImpl extends AbstractAnalysisService implements
 		// TODO Auto-generated method stub
 		super.getFileFromFtp(dayStr, fileExpression);
 		File fileDirFile = new File(ftpToLocalDir);
-		File[] files=fileDirFile.listFiles();
-		if (files!=null && files.length>0)
-		{
-		sortFileArrayByName(files);
-		for (File file : fileDirFile.listFiles()) {
-			if (isAnalysisFile(file.getName(), dayStr + fileExpression)) {
-				analysis(file, dayStr, batchNo);
-				return ;
+		File[] files = fileDirFile.listFiles();
+		if (files != null && files.length > 0) {
+			sortFileArrayByName(files);
+			for (File file : fileDirFile.listFiles()) {
+				if (isAnalysisFile(file.getName(), dayStr + fileExpression)) {
+					analysis(file, dayStr, batchNo);
+					return;
+				}
 			}
-		}
 		}
 	}
 
 	public RetVo handle(List<String[]> list, String dayStr, String batchNo) {
-		dbManager.executeSql(dataToSql(list, dayStr, batchNo));
-		list.clear();
-		return RetVo.getSuccessRet();
+		try {
+			dbManager.executeSql(dataToSql(list, dayStr, batchNo));
+			list.clear();
+			return RetVo.getSuccessRet();
+		} catch (Exception e) {
+			throw new AnalysisException(Constants.insert_data_error_code, Constants.insert_data_error_msg, e);
+		}
+
 	}
 
 	public void analysis(File file, String dayStr, String batchNo) {
@@ -86,8 +90,8 @@ public class ClientInfoModServiceImpl extends AbstractAnalysisService implements
 			handle(dataList, dayStr, batchNo);
 		} catch (Exception e) {
 			logger.error("解析银行对账文件时出现异常", e);
-			throw new AnalysisException(TaskCode.analysis_data_error_code, TaskCode.analysis_data_error_001,
-					TaskCode.task_sync_user_step);
+			throw new AnalysisException(Constants.analysis_data_error_code, Constants.analysis_data_error_001,
+					Constants.task_sync_user_step);
 		} finally {
 			if (bufferedReader != null) {
 				try {
@@ -108,8 +112,8 @@ public class ClientInfoModServiceImpl extends AbstractAnalysisService implements
 				if (oneData != null) {
 					insertSql.append("(");
 					insertSql.append("NOW(),");
-					insertSql.append("'"+dayStr+"',");
-					insertSql.append("'"+batchNo+"',");
+					insertSql.append("'" + dayStr + "',");
+					insertSql.append("'" + batchNo + "',");
 					insertSql.append("'" + oneData[0] + "',");
 					insertSql.append("'" + oneData[1] + "',");
 					insertSql.append("'" + oneData[2] + "',");

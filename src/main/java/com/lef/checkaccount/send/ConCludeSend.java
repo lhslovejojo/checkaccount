@@ -13,9 +13,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.blockchain.service.customer.CustomerResponse;
 import com.blockchain.service.tran.ConCludeRequest;
+import com.blockchain.service.tran.TranResponse;
 import com.lef.checkaccount.Exception.AnalysisException;
-import com.lef.checkaccount.common.TaskCode;
+import com.lef.checkaccount.common.Constants;
 import com.lef.checkaccount.utils.CodeUtil;
 import com.lef.checkaccount.utils.NumberUtil;
 
@@ -38,18 +40,23 @@ public class ConCludeSend extends AbstractSend {
 			list = findFromDb(dayStr, batchNo);
 		} catch (Exception e) {
 			logger.error(e);
-			throw new AnalysisException(TaskCode.find_data_fromdb_error_code, TaskCode.find_data_fromdb_error_msg, e);
+			throw new AnalysisException(Constants.find_data_fromdb_error_code, Constants.find_data_fromdb_error_msg, e);
 		}
 		if (!CollectionUtils.isEmpty(list)) {
 			for (ConCludeRequest request : list) {
+				TranResponse response = null;
+				String errorMsg = null;
 				try {
 					request.setRequestTime(new Date());
-					request.setRequestId(codeUtil.getSysRequestId(TaskCode.code_conclude_type));// 交易成交请求流水号
-					txnServiceClient.conClude(request);
+					request.setRequestId(codeUtil.getSysRequestId(Constants.code_conclude_type));// 交易成交请求流水号
+					response = txnServiceClient.conClude(request);
 				} catch (Exception e) {
 					logger.error(e);
-					throw new AnalysisException(TaskCode.send_data_tohessian_error_code,
-							TaskCode.send_data_tohessian_error_msg, e);
+					errorMsg = Constants.send_data_tohessian_error_msg;
+					throw new AnalysisException(Constants.send_data_tohessian_error_code,
+							Constants.send_data_tohessian_error_msg, e);
+				} finally {
+					updateSendResult(dayStr, batchNo, request, response, errorMsg);
 				}
 			}
 		}
@@ -57,7 +64,7 @@ public class ConCludeSend extends AbstractSend {
 
 	public List<ConCludeRequest> findFromDb(String dayStr, String batchNo) {
 		String sql = "select * from dealinfo where analysis_date=? and analysis_batch_no=?";
-		return dbManager.getJdbcTemplate().query(sql, new Object[]{dayStr,batchNo}, new RowMapper() {
+		return dbManager.getJdbcTemplate().query(sql, new Object[] { dayStr, batchNo }, new RowMapper() {
 			@Override
 			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 				ConCludeRequest request = new ConCludeRequest();
@@ -82,7 +89,7 @@ public class ConCludeSend extends AbstractSend {
 				request.setTradeDir(rs.getString("trade_dir"));
 				request.setDealType(rs.getString("deal_type"));
 				request.setOppDealType(rs.getString("opp_deal_type"));
-				 request.setOrderWay("Z");
+				request.setOrderWay("Z");
 				// request.setDepositWay(rs.getString("deposit_type"));
 				request.setOrderPrice(NumberUtil.getLongFromStr(rs.getString("deal_price")));
 				request.setHoldPrice(NumberUtil.getLongFromStr(rs.getString("hold_price")));
@@ -103,5 +110,19 @@ public class ConCludeSend extends AbstractSend {
 				return request;
 			}
 		});
+	}
+
+	private void updateSendResult(String dayStr, String batchNo, ConCludeRequest request, TranResponse response,
+			String errorMsg) {
+		String responseCode = null;
+		String responseDesc = null;
+		if (response != null) {
+			responseCode = response.getResponseCode();
+			responseDesc = response.getResponseDesc();
+		}
+		dbManager.getJdbcTemplate().update(
+				"update dealinfo  set response_code=?,response_desc=?,send_time=?,send_request_id=?,send_error_msg=? where analysis_date=? and analysis_batch_no=? and deal_id=?",
+				new Object[] { responseCode, responseDesc, request.getRequestTime(), request.getRequestId(), errorMsg,
+						dayStr, batchNo, request.getBusiNo() });
 	}
 }
