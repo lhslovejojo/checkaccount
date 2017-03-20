@@ -29,7 +29,7 @@ public class WebConfig {
 	@Bean
 	public HessianProxyFactoryBean accountServiceClient() {
 		HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
-		factory.setServiceUrl("http://localhost:8080/accountService");
+		factory.setServiceUrl("http://localhost:8080/remote/accountService");
 		factory.setServiceInterface(AccountService.class);
 		return factory;
 	}
@@ -40,7 +40,7 @@ public class WebConfig {
 	@Bean
 	public HessianProxyFactoryBean txnServiceClient() {
 		HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
-		factory.setServiceUrl("http://localhost:8080/txnServiceService");
+		factory.setServiceUrl("http://localhost:8080/remote/txnService");
 		factory.setServiceInterface(TxnService.class);
 		return factory;
 	}

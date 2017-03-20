@@ -7,32 +7,42 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.lef.checkaccount.Exception.AnalysisException;
 import com.lef.checkaccount.common.Constants;
 import com.lef.checkaccount.grabdata.AbstractAnalysisService;
 import com.lef.checkaccount.grabdata.GrabDataService;
-import com.lef.checkaccount.utils.DbManager;
 import com.lef.checkaccount.vo.RetVo;
 
 @Service
 public class ClearPriceServiceImpl extends AbstractAnalysisService implements GrabDataService {
 	
 	private static Log logger = LogFactory.getLog(ClearPriceServiceImpl.class);
-	private String tableName="clearprice";
-	@Resource
-	DbManager dbManager;
+	@Value("${grabdata.ClearPrice.tableName}")
+	private String tableName;
+	@Value("${grabdata.ClearPrice.fileExpression}")
+	private String fileExpression;
 
 	public void execute(String dayStr,String batchNo) {
 		// TODO Auto-generated method stub
+				super.getFileFromFtp(dayStr, fileExpression);
+				File fileDirFile = new File(ftpToLocalDir);
+				File[] files = fileDirFile.listFiles();
+				if (files != null && files.length > 0) {
+					sortFileArrayByName(files);
+					for (File file : fileDirFile.listFiles()) {
+						if (isAnalysisFile(file.getName(), dayStr + fileExpression)) {
+							analysis(file, dayStr, batchNo);
+							return;
+						}
+					}
+				}
 
 	}
 	public RetVo handle(List<String[]> list,String dayStr, String batchNo) {
@@ -91,8 +101,6 @@ public class ClearPriceServiceImpl extends AbstractAnalysisService implements Gr
 				if (oneData != null) {
 					insertSql.append("(");
 					insertSql.append("NOW(),");
-					insertSql.append("'"+dayStr+"',");
-					insertSql.append("'"+batchNo+"',");
 					insertSql.append("'"+dayStr+"',");
 					insertSql.append("'"+batchNo+"',");
 					insertSql.append("'" + oneData[0] + "',");

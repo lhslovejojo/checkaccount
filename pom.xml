@@ -57,11 +57,9 @@
 			<version>4.0.38</version>
 		</dependency>
 		<dependency>
-			<groupId>com.blockchain.service</groupId>
+			<groupId>com.blockchain</groupId>
 			<artifactId>transerviceapi</artifactId>
 			<version>0.0.2</version>
-			<systemPath>${project.basedir}/lib/transerviceapi-0.0.2.jar</systemPath>
-			<scope>system</scope>
 		</dependency>
 
 	</dependencies>
@@ -79,44 +77,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-
-				<artifactId>maven-compiler-plugin</artifactId>
-
-				<configuration>
-
-					<source>1.7</source>
-
-					<target>1.7</target>
-
-					<encoding>UTF-8</encoding>
-
-					<compilerArguments>
-
-						<extdirs>${project.basedir}/lib</extdirs>
-
-					</compilerArguments>
-
-				</configuration>
-
-			</plugin>
-
-		</plugins>
-		<resources>
-
-			<resource>
-
-				<directory>lib</directory>
-
-				<targetPath>lib/</targetPath>
-
-				<includes>
-
-					<include>**/*.jar</include>
-
-				</includes>
-
-			</resource>
-		</resources>
+			</plugins>
 	</build>
 </project>

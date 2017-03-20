@@ -10,6 +10,7 @@ public class Constants {
  public static final int task_takenow_step=4;
  public static final int task_toll_step=5;
  public static final int position_toll_step=6;
+ public static final int task_settle_price_step=7;
  public static final Map<Integer,String> task_step_dec_map=new HashMap<Integer,String>();
  public static final String analysis_data_error_code="001";
  public static final String analysis_data_error_001="文件解析失败";
@@ -36,6 +37,7 @@ public class Constants {
 	 task_step_dec_map.put(task_takenow_step, "同步客户出金信息") ;
 	 task_step_dec_map.put(task_toll_step, "同步收费单信息") ;
 	 task_step_dec_map.put(position_toll_step, "同步持仓信息") ;
+	 task_step_dec_map.put(task_settle_price_step, "同步结算价信息") ;
 	 
  }
 }

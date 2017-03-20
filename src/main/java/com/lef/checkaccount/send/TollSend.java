@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.blockchain.service.tran.TollRequest;
+import com.blockchain.service.tran.TranResponse;
 import com.lef.checkaccount.Exception.AnalysisException;
 import com.lef.checkaccount.common.Constants;
 import com.lef.checkaccount.utils.CodeUtil;
@@ -41,26 +42,31 @@ public class TollSend extends AbstractSend {
 		}
 		if (!CollectionUtils.isEmpty(list)) {
 			for (TollRequest request : list) {
+				TranResponse response = null;
+				String errorMsg = null;
 				try {
 					request.setRequestTime(new Date());
 					request.setRequestId(codeUtil.getSysRequestId(Constants.code_toll_type));// 交易所收费单请求流水号
-					txnServiceClient.toll(request);
+					response=txnServiceClient.toll(request);
 				} catch (Exception e) {
+					errorMsg=Constants.send_data_tohessian_error_msg;
 					logger.error(e);
 					throw new AnalysisException(Constants.send_data_tohessian_error_code,
 							Constants.send_data_tohessian_error_msg, e);
+				}finally {
+					updateSendResult(dayStr, batchNo, request, response, errorMsg);
 				}
 			}
 		}
 	}
 
 	public List<TollRequest> findFromDb(String dayStr, String batchNo) {
-		String sql = "select * from dealinfo where analysis_date=? and analysis_batch_no=?";
+		String sql = "select * from memberfee where analysis_date=? and analysis_batch_no=?";
 		return dbManager.getJdbcTemplate().query(sql, new Object[] { dayStr, batchNo }, new RowMapper() {
 			@Override
 			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 				TollRequest request = new TollRequest();
-				request.setBusiNo(rs.getString("deal_id"));
+				request.setBusiNo(rs.getString("serial_no"));
 				request.setExchangeId(rs.getString("exchange_id"));
 				request.setExchangeMarketType(rs.getString("exchange_market_type"));
 				request.setBizType(rs.getString("biz_type"));
@@ -80,5 +86,18 @@ public class TollSend extends AbstractSend {
 				return request;
 			}
 		});
+	}
+	private void updateSendResult(String dayStr, String batchNo, TollRequest request, TranResponse response,
+			String errorMsg) {
+		String responseCode = null;
+		String responseDesc = null;
+		if (response != null) {
+			responseCode = response.getResponseCode();
+			responseDesc = response.getResponseDesc();
+		}
+		dbManager.getJdbcTemplate().update(
+				"update memberfee  set response_code=?,response_desc=?,send_time=?,send_request_id=?,send_error_msg=? where analysis_date=? and analysis_batch_no=? and serial_no=?",
+				new Object[] { responseCode, responseDesc, request.getRequestTime(), request.getRequestId(), errorMsg,
+						dayStr, batchNo, request.getBusiNo() });
 	}
 }

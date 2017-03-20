@@ -34,6 +34,8 @@ public class MainHandlerTask {
 	@Resource
 	PositionTask positionTask;
 	@Resource
+	SettlePriceTask settlePriceTask;
+	@Resource
 	DbManager dbManager;
 	@Resource
 	AnalysisRecordService analysisRecordService;
@@ -61,18 +63,20 @@ public class MainHandlerTask {
 		analysisRecord = analysisRecordService.saveAnalysisRecord(analysisRecord);
 		try {
 			switch (step) {
-//			case 1:
-//				syncUserInfoTask.execute(dayStr,batchNo); // 同步用户注册信息
-//			case 2:
-//				rechargeTask.execute(dayStr,batchNo); // 入金
-//			case 3:
-//				conCludeTask.execute(dayStr,batchNo); // 客户成交单
-//			case 4:
-//				takeNowTask.execute(dayStr,batchNo); // 出金
+			case 1:
+				syncUserInfoTask.execute(dayStr,batchNo); // 同步用户注册信息
+			case 2:
+				rechargeTask.execute(dayStr,batchNo); // 入金
+			case 3:
+				conCludeTask.execute(dayStr,batchNo); // 客户成交单
+			case 4:
+				takeNowTask.execute(dayStr,batchNo); // 出金
 			case 5:
 				tollTask.execute(dayStr,batchNo); // 交易所收费单
-//			case 6:
-//				positionTask.execute(dayStr,batchNo); // 持仓清算文件
+			case 6:
+				positionTask.execute(dayStr,batchNo); // 持仓清算文件
+			case 7:
+				settlePriceTask.execute(dayStr,batchNo); // 同步结算价文件
 			default:
 				break;
 			}

@@ -13,7 +13,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.blockchain.service.customer.CustomerResponse;
 import com.blockchain.service.tran.ConCludeRequest;
 import com.blockchain.service.tran.TranResponse;
 import com.lef.checkaccount.Exception.AnalysisException;
