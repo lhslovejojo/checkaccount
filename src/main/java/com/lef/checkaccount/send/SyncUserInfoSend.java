@@ -40,18 +40,28 @@ public class SyncUserInfoSend extends AbstractSend {
 		}
 		if (!CollectionUtils.isEmpty(list)) {
 			for (UserInfoSyncRequest user : list) {
-				CustomerResponse customerResponse = null;
+				CustomerResponse response = null;
 				String errorMsg = null;
 				Date sendDate = new Date();
 				try {
-					customerResponse = accountServiceClient.syncUserInfo(user);
+					response = accountServiceClient.syncUserInfo(user);
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						logger.info("send second " + response);
+						response = accountServiceClient.syncUserInfo(user);
+					}
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						throw new AnalysisException(Constants.send_data_tohessian_error_code,
+								Constants.send_data_tohessian_error_msg);
+					}
 				} catch (Exception e) {
 					logger.error(e);
 					errorMsg = Constants.send_data_tohessian_error_msg;
 					throw new AnalysisException(Constants.send_data_tohessian_error_code,
 							Constants.send_data_tohessian_error_msg, e);
 				} finally {
-					updateSendResult(dayStr, batchNo, user.getSerialNo(), customerResponse, errorMsg, sendDate);
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						updateSendResult(dayStr, batchNo, user.getSerialNo(), response, errorMsg, sendDate);
+					}
 				}
 			}
 		}

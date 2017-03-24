@@ -49,13 +49,23 @@ public class TakeNowSend extends AbstractSend {
 					request.setRequestTime(new Date());
 					request.setRequestId(codeUtil.getSysRequestId(Constants.code_takenow_type));// 出金请求流水号
 					response = txnServiceClient.takeNow(request);
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						logger.info("send second " + response);
+						response = txnServiceClient.takeNow(request);
+					}
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						throw new AnalysisException(Constants.send_data_tohessian_error_code,
+								Constants.send_data_tohessian_error_msg);
+					}
 				} catch (Exception e) {
 					errorMsg = Constants.send_data_tohessian_error_msg;
 					logger.error(e);
 					throw new AnalysisException(Constants.send_data_tohessian_error_code,
 							Constants.send_data_tohessian_error_msg, e);
 				} finally {
-					updateSendResult(dayStr, batchNo, request, response, errorMsg);
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						updateSendResult(dayStr, batchNo, request, response, errorMsg);
+					}
 				}
 			}
 		}
@@ -68,7 +78,7 @@ public class TakeNowSend extends AbstractSend {
 			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 				TakeNowRequest request = new TakeNowRequest();
 				request.setSerialNo(rs.getString("serial_no"));
-				request.setTradeSerialNO(rs.getString("trade_serial_no"));
+				request.setTradeSerialNo(rs.getString("trade_serial_no"));
 				request.setSystemCode(rs.getString("exchange_id"));
 				request.setBusiDate(rs.getString("init_date"));
 				request.setBusiType("TakeNow"); // 自定义
@@ -79,7 +89,7 @@ public class TakeNowSend extends AbstractSend {
 				// 下面是扩展字段
 				request.setBankProCode(rs.getString("bank_pro_code"));
 				request.setBankAccount(rs.getString("bank_account"));
-				request.setBankNO(rs.getString("bank_no"));
+				request.setBankNo(rs.getString("bank_no"));
 				return request;
 			}
 		});

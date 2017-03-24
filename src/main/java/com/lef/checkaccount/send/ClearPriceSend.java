@@ -45,13 +45,23 @@ public class ClearPriceSend extends AbstractSend {
 				String errorMsg = null;
 				try {
 					response = txnServiceClient.syncSettlePrice(request);
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						logger.info("send second " + response);
+						response = txnServiceClient.syncSettlePrice(request);
+					}
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						throw new AnalysisException(Constants.send_data_tohessian_error_code,
+								Constants.send_data_tohessian_error_msg);
+					}
 				} catch (Exception e) {
 					errorMsg = Constants.send_data_tohessian_error_msg;
 					logger.error(e);
 					throw new AnalysisException(Constants.send_data_tohessian_error_code,
 							Constants.send_data_tohessian_error_msg, e);
 				} finally {
-					updateSendResult(dayStr, batchNo, request, response, errorMsg);
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						updateSendResult(dayStr, batchNo, request, response, errorMsg);
+					}
 				}
 			}
 		}

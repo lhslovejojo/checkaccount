@@ -48,14 +48,25 @@ public class PositionSend extends AbstractSend {
 					request.setRequestTime(new Date());
 					request.setRequestId(codeUtil.getSysRequestId(Constants.code_position_type));// 持仓明细请求流水号
 					response = txnServiceClient.position(request);
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						logger.info("send second " + response);
+						response = txnServiceClient.position(request);
+					}
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						throw new AnalysisException(Constants.send_data_tohessian_error_code,
+								Constants.send_data_tohessian_error_msg);
+					}
 				} catch (Exception e) {
 					errorMsg = Constants.send_data_tohessian_error_msg;
 					logger.error(e);
 					throw new AnalysisException(Constants.send_data_tohessian_error_code,
 							Constants.send_data_tohessian_error_msg, e);
 				} finally {
-					updateSendResult(dayStr, batchNo, request, response, errorMsg);
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						updateSendResult(dayStr, batchNo, request, response, errorMsg);
+					}
 				}
+
 			}
 		}
 	}
@@ -95,6 +106,7 @@ public class PositionSend extends AbstractSend {
 			}
 		});
 	}
+
 	private void updateSendResult(String dayStr, String batchNo, PositionRequest request, TranResponse response,
 			String errorMsg) {
 		String responseCode = null;

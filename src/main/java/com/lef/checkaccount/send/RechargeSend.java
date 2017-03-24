@@ -48,14 +48,24 @@ public class RechargeSend extends AbstractSend {
 				try {
 					request.setRequestTime(new Date());
 					request.setRequestId(codeUtil.getSysRequestId(Constants.code_recharge_type));// 入金请求流水号
-					response=txnServiceClient.recharge(request);
+					response = txnServiceClient.recharge(request);
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						logger.info("send second " + response);
+						response = txnServiceClient.recharge(request);
+					}
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						throw new AnalysisException(Constants.send_data_tohessian_error_code,
+								Constants.send_data_tohessian_error_msg);
+					}
 				} catch (Exception e) {
-					errorMsg=Constants.send_data_tohessian_error_msg;
+					errorMsg = Constants.send_data_tohessian_error_msg;
 					logger.error(e);
 					throw new AnalysisException(Constants.send_data_tohessian_error_code,
 							Constants.send_data_tohessian_error_msg, e);
 				} finally {
-					updateSendResult(dayStr, batchNo, request, response, errorMsg);
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						updateSendResult(dayStr, batchNo, request, response, errorMsg);
+					}
 				}
 			}
 		}
@@ -80,11 +90,12 @@ public class RechargeSend extends AbstractSend {
 				// 下面是扩展字段
 				request.setBankProCode(rs.getString("bank_pro_code"));
 				request.setBankAccount(rs.getString("bank_account"));
-				request.setBankNO(rs.getString("bank_no"));
+				request.setBankNo(rs.getString("bank_no"));
 				return request;
 			}
 		});
 	}
+
 	private void updateSendResult(String dayStr, String batchNo, RechargeRequest request, TranResponse response,
 			String errorMsg) {
 		String responseCode = null;

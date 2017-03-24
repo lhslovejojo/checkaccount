@@ -28,7 +28,7 @@ public class Constants {
  public static final String code_conclude_type="conclude_request";  //获取成交requestId
  public static final String code_toll_type="toll_request";  //获取交易所收费requestId
  public static final String code_position_type="position_request";  //获取持仓明细requestId
- 
+ public static final String hessianBackSuccessCode = "000000";
  static 
  {
 	 task_step_dec_map.put(task_sync_user_step, "同步交易所会员信息") ;

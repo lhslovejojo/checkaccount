@@ -12,45 +12,32 @@ import com.lef.checkaccount.remote.HessianRemoteInterface;
 
 @Configuration
 public class WebConfig {
-	@Autowired
-    private HessianRemoteInterface hessianRemoteImpl; 
+	private String hessianUrl = "http://localhost:8080";
 
-	@Bean
-	public HessianProxyFactoryBean hessianRemote() {
-		HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
-		factory.setServiceUrl("http://localhost:8080/helloService");
-		factory.setServiceInterface(HessianRemoteInterface.class);
-		return factory;
-	}
 	/**
 	 * 账户接口调用hessian客户端
+	 * 
 	 * @return
 	 */
 	@Bean
 	public HessianProxyFactoryBean accountServiceClient() {
 		HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
-		factory.setServiceUrl("http://localhost:8080/remote/accountService");
+		factory.setServiceUrl(hessianUrl + "/remote/accountService");
 		factory.setServiceInterface(AccountService.class);
 		return factory;
 	}
+
 	/**
 	 * 交易接口调用hessian客户端
+	 * 
 	 * @return
 	 */
 	@Bean
 	public HessianProxyFactoryBean txnServiceClient() {
 		HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
-		factory.setServiceUrl("http://localhost:8080/remote/txnService");
+		factory.setServiceUrl(hessianUrl + "/remote/txnService");
 		factory.setServiceInterface(TxnService.class);
 		return factory;
 	}
-	@Bean(name = "/helloService") 
-	public HessianServiceExporter accountService() {
-		HessianServiceExporter exporter = new HessianServiceExporter();
-		exporter.setService(hessianRemoteImpl);
-		exporter.setServiceInterface(HessianRemoteInterface.class);
-		return exporter;
-	 } 
-
 
 }

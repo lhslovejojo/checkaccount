@@ -46,16 +46,28 @@ public class ConCludeSend extends AbstractSend {
 				TranResponse response = null;
 				String errorMsg = null;
 				try {
+					Long currentTime = System.currentTimeMillis();
 					request.setRequestTime(new Date());
 					request.setRequestId(codeUtil.getSysRequestId(Constants.code_conclude_type));// 交易成交请求流水号
 					response = txnServiceClient.conClude(request);
+					System.out.println("耗时:" + (System.currentTimeMillis() - currentTime));
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						logger.info("send second " + response);
+						response = txnServiceClient.conClude(request);
+					}
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						throw new AnalysisException(Constants.send_data_tohessian_error_code,
+								Constants.send_data_tohessian_error_msg);
+					}
 				} catch (Exception e) {
 					logger.error(e);
 					errorMsg = Constants.send_data_tohessian_error_msg;
 					throw new AnalysisException(Constants.send_data_tohessian_error_code,
 							Constants.send_data_tohessian_error_msg, e);
 				} finally {
-					updateSendResult(dayStr, batchNo, request, response, errorMsg);
+					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
+						updateSendResult(dayStr, batchNo, request, response, errorMsg);
+					}
 				}
 			}
 		}
