@@ -2,23 +2,22 @@ package com.letv.GrabData;
 
 import java.net.MalformedURLException;
 
-import com.blockchain.service.QueryService;
-import com.blockchain.service.page.PageResponse;
-import com.blockchain.service.query.UserRequest;
-import com.blockchain.service.query.UserResponse;
+import com.blockchain.service.AccountService;
+import com.blockchain.service.customer.CustomerResponse;
+import com.blockchain.service.customer.UserInfoSyncRequest;
 import com.caucho.hessian.client.HessianProxyFactory;
 
 public class TestHessian {
-  public static String url = "http://127.0.0.1:8080/remote/queryService";
+  public static String url = "http://localhost:8080/leftranservice/remote/accountService";
   public static void  main(String[] args){
       HessianProxyFactory factory = new HessianProxyFactory();
       try {
-    	  QueryService queryService = (QueryService) factory.create(QueryService.class, url);
-    	  UserRequest request =new UserRequest();
+    	  AccountService accountService = (AccountService) factory.create(AccountService.class, url);
+    	  UserInfoSyncRequest request =new UserInfoSyncRequest();
     	  request.setMemCode("567008");
 //    	  request.setFundAccountClear(fundAccountClear);("567008");
-    	  PageResponse<UserResponse> users= queryService.queryUser(request);
-          System.out.println(users);
+    	  CustomerResponse user= accountService.syncUserInfo(request);
+          System.out.println(user);
       } catch (MalformedURLException e) {
           e.printStackTrace();
       }

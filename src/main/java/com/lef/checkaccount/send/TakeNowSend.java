@@ -42,6 +42,7 @@ public class TakeNowSend extends AbstractSend {
 			throw new AnalysisException(Constants.find_data_fromdb_error_code, Constants.find_data_fromdb_error_msg, e);
 		}
 		if (!CollectionUtils.isEmpty(list)) {
+			logger.info("list size:"+list.size());
 			for (TakeNowRequest request : list) {
 				TranResponse response = null;
 				String errorMsg = null;

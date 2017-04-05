@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.lef.checkaccount.task.InitDataTask;
 import com.lef.checkaccount.task.MainHandlerTask;
 import com.lef.checkaccount.utils.DateUtil;
 import com.lef.checkaccount.vo.RetVo;
@@ -15,6 +16,8 @@ import com.lef.checkaccount.vo.RetVo;
 public class GrabDataController {
 	@Resource
 	MainHandlerTask mainHandlerTask;
+	@Resource
+	InitDataTask initDataTask;
 
 	@RequestMapping(value = "/grabData")
 	public @ResponseBody RetVo grabData(@RequestParam(value = "dayStr") String dayStr,
@@ -34,5 +37,35 @@ public class GrabDataController {
 	public String toGrabData() {
 		return "grabData";
 	}
+
+	@RequestMapping(value = "/initGrabData")
+	public @ResponseBody RetVo initGrabData(@RequestParam(value = "tableName") String tableName,
+			@RequestParam(value = "filePath", required = true) String filePath) {
+		try {
+			initDataTask.execute(tableName, filePath);
+			return RetVo.getSuccessRet();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return RetVo.getFailRet();
+		}
+
+	}
+
+	@RequestMapping(value = "/toInitGrabData")
+	public String toInitGrabData() {
+		return "initGrabData";
+	}
+	@RequestMapping(value = "/initAccount")
+	public @ResponseBody RetVo initAccount() {
+		try {
+			initDataTask.executeSendJbcc();
+			return RetVo.getSuccessRet();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return RetVo.getFailRet();
+		}
+
+	}
+	
 
 }

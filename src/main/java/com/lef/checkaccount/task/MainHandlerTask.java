@@ -58,9 +58,10 @@ public class MainHandlerTask {
 		analysisRecord.setAnalysisDay(dayStr);
 		analysisRecord.setStatus(Constants.task_status_doing);
 		String batchNo=DateUtil.DateToString(new Date(), "yyyyMMddHHmmss");
-		logger.info("analysis batch-no:"+batchNo);
+		logger.info("begin analysis batch-no:"+batchNo);
 		analysisRecord.setAnalysisBatchNo(batchNo);
 		analysisRecord = analysisRecordService.saveAnalysisRecord(analysisRecord);
+		logger.info("step:"+step);
 		try {
 			switch (step) {
 			case 1:
@@ -82,6 +83,7 @@ public class MainHandlerTask {
 			}
 			analysisRecord.setStatus(Constants.task_status_success);
 			analysisRecordService.saveAnalysisRecord(analysisRecord);
+			logger.info("end analysis batch-no:"+batchNo);
 			return RetVo.getSuccessRet();
 		} catch (AnalysisException e) {
 			 saveException(analysisRecord, e);

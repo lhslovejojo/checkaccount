@@ -22,9 +22,11 @@ public class SettlePriceTask {
 	public void execute(String dayStr, String batchNo) {
 		// 1.clearPrice.txt
 		// 2.发送数据
+		logger.info("do SettlePriceTask begin");
 		try {
 			clearPriceServiceImpl.execute(dayStr, batchNo);
 			clearPriceSend.send(dayStr, batchNo);
+			logger.info("do SettlePriceTask end");
 		} catch (Exception e) {
 			logger.error(e);
 			throw new AnalysisException(Constants.analysis_data_error_code, Constants.analysis_data_error_001,

@@ -1,0 +1,9 @@
+<html>
+<body>
+<form action="initGrabData" method="post">
+  <p>表名: <input type="text" name="tableName" /></p>
+  <p>文件路径: <input type="text" name="filePath" /></p>
+  <input type="submit" value="Submit" />
+</form>
+</body>
+</html>

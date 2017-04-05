@@ -22,9 +22,11 @@ public class RechargeTask {
 	public void execute(String dayStr, String batchNo) {
 		// 1.解析yyyymmdd_xxx(交易所代码)_yyy(银行产品代码)_bankCheck.txt 中入金记录
 		// 2.发送数据
+		logger.info("do RechargeTask begin");
 		try {
 			bankCheckRechargeServiceImpl.execute(dayStr, batchNo);
 			rechargeSend.send(dayStr, batchNo);
+			logger.info("do RechargeTask end");
 		} catch (Exception e) {
 			logger.error(e);
 			throw new AnalysisException(Constants.analysis_data_error_code, Constants.analysis_data_error_001,

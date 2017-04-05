@@ -22,9 +22,11 @@ public class TollTask {
 	public void execute(String dayStr,String batchNo) {
 		// 1.解析yyyymmdd_xxx(交易所代码)_clientInfoMod.txt
 		// 2.发送数据
+		logger.info("do TollTask begin");
 		try {
 			memberFeeServiceImpl.execute(dayStr,batchNo);
 			tollSend.send(dayStr,batchNo);
+			logger.info("do TollTask end");
 		} catch (Exception e) {
 			logger.error(e);
 			throw new AnalysisException(Constants.analysis_data_error_code, Constants.analysis_data_error_001,

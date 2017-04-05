@@ -1,18 +1,17 @@
 package com.lef.checkaccount.web;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.remoting.caucho.HessianProxyFactoryBean;
-import org.springframework.remoting.caucho.HessianServiceExporter;
 
 import com.blockchain.service.AccountService;
 import com.blockchain.service.TxnService;
-import com.lef.checkaccount.remote.HessianRemoteInterface;
 
 @Configuration
 public class WebConfig {
-	private String hessianUrl = "http://localhost:8080";
+	@Value("${WebConfig.hessianUrl}")
+	private String hessianUrl;
 
 	/**
 	 * 账户接口调用hessian客户端

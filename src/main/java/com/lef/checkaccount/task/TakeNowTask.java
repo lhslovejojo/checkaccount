@@ -22,9 +22,11 @@ public class TakeNowTask {
 	public void execute(String dayStr,String batchNo) {
 		// 1.解析yyyymmdd_xxx(交易所代码)_yyy(银行产品代码)_bankCheck.txt 中出金记录
 		// 2.发送数据
+		logger.info("do TakeNowTask begin");
 		try {
 			bankCheckTakeNowServiceImpl.execute(dayStr,batchNo);
 			takeNowSend.send(dayStr,batchNo);
+			logger.info("do TakeNowTask end");
 		} catch (Exception e) {
 			logger.error(e);
 			throw new AnalysisException(Constants.analysis_data_error_code, Constants.analysis_data_error_001,

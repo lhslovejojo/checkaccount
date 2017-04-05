@@ -28,9 +28,11 @@ public class PositionTask {
 	public void execute(String dayStr, String batchNo) {
 		// 1.解析yyyymmdd_xxx(交易所代码)_clientInfoMod.txt
 		// 2.发送数据
+		logger.info("do PositionTask begin");
 		try {
 			memberPositionDetailServiceImpl.execute(dayStr, batchNo);
 			positionSend.send(dayStr, batchNo);
+			logger.info("do PositionTask end");
 		} catch (Exception e) {
 			logger.error(e);
 			throw new AnalysisException(Constants.analysis_data_error_code, Constants.analysis_data_error_001,
