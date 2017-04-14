@@ -41,7 +41,7 @@ public class PositionSend extends AbstractSend {
 			throw new AnalysisException(Constants.find_data_fromdb_error_code, Constants.find_data_fromdb_error_msg, e);
 		}
 		if (!CollectionUtils.isEmpty(list)) {
-			logger.info("list size:"+list.size());
+			logger.info("list size:" + list.size());
 			for (PositionRequest request : list) {
 				TranResponse response = null;
 				String errorMsg = null;
@@ -88,21 +88,21 @@ public class PositionSend extends AbstractSend {
 				request.setBusiTime(rs.getString("busi_datetime"));
 				request.setTradeDir(rs.getString("trade_dir"));
 				request.setDepositWay(rs.getString("deposit_way"));
-				request.setOrderPrice(NumberUtil.getDoubleFromStr(rs.getString("open_price")));
-				request.setHoldPrice(NumberUtil.getDoubleFromStr(rs.getString("hold_price")));
-				request.setOrderQuantity(NumberUtil.getDoubleFromStr(rs.getString("deal_quantity")));
+				request.setOrderPrice(NumberUtil.getBigDecimalFromStr(rs.getString("open_price")));
+				request.setHoldPrice(NumberUtil.getBigDecimalFromStr(rs.getString("hold_price")));
+				request.setOrderQuantity(NumberUtil.getBigDecimalFromStr(rs.getString("deal_quantity")));
 				request.setDealTotalPrice(rs.getString("left_quantity"));
 				request.setPresentUnit(rs.getString("present_unit"));
-				request.setDepositRate(NumberUtil.getDoubleFromStr(rs.getString("deposit_rate")));
+				request.setDepositRate(NumberUtil.getBigDecimalFromStr(rs.getString("deposit_rate")));
 				request.setDepositRatioType(rs.getString("deposit_ratio_type"));
 				request.setDepositType(rs.getString("deposit_type"));
-				request.setDepositBalance(NumberUtil.getDoubleFromStr(rs.getString("perform_balance")));
-				request.setOpenPoundage(NumberUtil.getDoubleFromStr(rs.getString("trade_poundage")));
-				request.setSquareLoss(NumberUtil.getDoubleFromStr(rs.getString("square_profit_loss")));
-				request.setSettleLoss(NumberUtil.getDoubleFromStr(rs.getString("settle_profit_loss")));
+				request.setDepositBalance(NumberUtil.getBigDecimalFromStr(rs.getString("perform_balance")));
+				request.setOpenPoundage(NumberUtil.getBigDecimalFromStr(rs.getString("trade_poundage")));
+				request.setSquareLoss(NumberUtil.getBigDecimalFromStr(rs.getString("square_profit_loss")));
+				request.setSettleLoss(NumberUtil.getBigDecimalFromStr(rs.getString("settle_profit_loss")));
 				request.setDepotOrderNo(rs.getString("hold_id"));
-				request.setSettlePrice(NumberUtil.getDoubleFromStr(rs.getString("settle_price")));
-				request.setDelayFees(NumberUtil.getDoubleFromStr(rs.getString("delay_fees")));
+				request.setSettlePrice(NumberUtil.getBigDecimalFromStr(rs.getString("settle_price")));
+				request.setDelayFees(NumberUtil.getBigDecimalFromStr(rs.getString("delay_fees")));
 				return request;
 			}
 		});

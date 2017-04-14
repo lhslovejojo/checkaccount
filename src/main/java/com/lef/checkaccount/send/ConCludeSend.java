@@ -47,11 +47,9 @@ public class ConCludeSend extends AbstractSend {
 				TranResponse response = null;
 				String errorMsg = null;
 				try {
-					Long currentTime = System.currentTimeMillis();
 					request.setRequestTime(new Date());
 					request.setRequestId(codeUtil.getSysRequestId(Constants.code_conclude_type));// 交易成交请求流水号
 					response = txnServiceClient.conClude(request);
-					System.out.println("耗时:" + (System.currentTimeMillis() - currentTime));
 					if (response == null || !Constants.hessianBackSuccessCode.equals(response.getResponseCode())) {
 						logger.info("send second " + response);
 						response = txnServiceClient.conClude(request);
@@ -103,17 +101,17 @@ public class ConCludeSend extends AbstractSend {
 				request.setOppDealType(rs.getString("opp_deal_type"));
 				request.setOrderWay("Z");
 				// request.setDepositWay(rs.getString("deposit_type"));
-				request.setOrderPrice(NumberUtil.getLongFromStr(rs.getString("deal_price")));
-				request.setHoldPrice(NumberUtil.getLongFromStr(rs.getString("hold_price")));
-				request.setOrderQuantity(NumberUtil.getIntegerFromStr(rs.getString("deal_quantity")));
-				request.setDealTotalPrice(NumberUtil.getLongFromStr(rs.getString("deal_total_price")));
-				request.setDepositRate(NumberUtil.getDoubleFromStr(rs.getString("deposit_rate")));
+				request.setOrderPrice(NumberUtil.getBigDecimalFromStr(rs.getString("deal_price")));
+				request.setHoldPrice(NumberUtil.getBigDecimalFromStr(rs.getString("hold_price")));
+				request.setOrderQuantity(NumberUtil.getBigDecimalFromStr(rs.getString("deal_quantity")));
+				request.setDealTotalPrice(NumberUtil.getBigDecimalFromStr(rs.getString("deal_total_price")));
+				request.setDepositRate(NumberUtil.getBigDecimalFromStr(rs.getString("deposit_rate")));
 
 				request.setDepositRatioType(rs.getString("deposit_ratio_type"));
 				request.setDepositType(rs.getString("deposit_type"));
-				request.setDepositBalance(NumberUtil.getLongFromStr(rs.getString("deposit_balance")));
-				request.setOpenPoundage(NumberUtil.getLongFromStr(rs.getString("open_poundage")));
-				request.setOppPoundage(NumberUtil.getLongFromStr(rs.getString("opp_poundage")));
+				request.setDepositBalance(NumberUtil.getBigDecimalFromStr(rs.getString("deposit_balance")));
+				request.setOpenPoundage(NumberUtil.getBigDecimalFromStr(rs.getString("open_poundage")));
+				request.setOppPoundage(NumberUtil.getBigDecimalFromStr(rs.getString("opp_poundage")));
 				request.setDepotOrderNo(rs.getString("depot_order_no"));
 				request.setOppDepotOrderNo(rs.getString("opp_depot_order_no"));
 				request.setOrderId(rs.getString("order_id"));

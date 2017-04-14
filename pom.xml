@@ -54,7 +54,7 @@
 		<dependency>
 			<groupId>com.caucho</groupId>
 			<artifactId>hessian</artifactId>
-			<version>4.0.38</version>
+			<version>4.0.37</version>
 		</dependency>
 		<dependency>
 			<groupId>com.blockchain</groupId>

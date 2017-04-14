@@ -80,7 +80,7 @@ public class ClearPriceSend extends AbstractSend {
 				request.setMoneyType(rs.getString("money_type"));
 				request.setProductCategoryId(rs.getString("product_category_id"));
 				request.setProductCode(rs.getString("product_code"));
-				request.setSettlePrice(NumberUtil.getDoubleFromStr(rs.getString("settle_price")));
+				request.setSettlePrice(NumberUtil.getBigDecimalFromStr(rs.getString("settle_price")));
 				return request;
 			}
 		});

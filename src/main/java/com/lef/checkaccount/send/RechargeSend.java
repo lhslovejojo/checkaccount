@@ -87,7 +87,7 @@ public class RechargeSend extends AbstractSend {
 				request.setMemCode(rs.getString("mem_code"));
 				request.setFundAccountClear(rs.getString("fund_account"));
 				request.setMoneyType(rs.getString("money_type"));
-				request.setOrderAmt(NumberUtil.getLongFromStr(rs.getString("occur_amount")));
+				request.setOrderAmt(NumberUtil.getBigDecimalFromStr(rs.getString("occur_amount")));
 				// 下面是扩展字段
 				request.setBankProCode(rs.getString("bank_pro_code"));
 				request.setBankAccount(rs.getString("bank_account"));

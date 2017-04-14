@@ -40,7 +40,7 @@ public class BankCheckRechargeServiceImpl extends AbstractAnalysisService implem
 	public void execute(String dayStr,String batchNo) {
 		// TODO Auto-generated method stub
 		super.getFileFromFtp(dayStr, fileExpression);
-		File fileDirFile = new File(ftpToLocalDir);
+		File fileDirFile = new File(ftpToLocalDir+dayStr);
 		File[] files=fileDirFile.listFiles();
 		if (files!=null && files.length>0)
 		{

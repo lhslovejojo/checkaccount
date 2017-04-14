@@ -271,10 +271,10 @@ public class InitDataSend extends AbstractSend {
 			@Override
 			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 				AccountBalUpdateRequest request = new AccountBalUpdateRequest();
-				request.setAbleBal(NumberUtil.getDoubleFromStr(rs.getString("usable_balance")));
-				request.setAdvanceBal(NumberUtil.getDoubleFromStr(rs.getString("fetch_balance")));
-				request.setTotalBal(NumberUtil.getDoubleFromStr(rs.getString("account_balance")));
-				request.setFrozenBal(NumberUtil.getDoubleFromStr(rs.getString("freeze_balance")));
+				request.setAbleBal(NumberUtil.getBigDecimalFromStr(rs.getString("usable_balance")));
+				request.setAdvanceBal(NumberUtil.getBigDecimalFromStr(rs.getString("fetch_balance")));
+				request.setTotalBal(NumberUtil.getBigDecimalFromStr(rs.getString("account_balance")));
+				request.setFrozenBal(NumberUtil.getBigDecimalFromStr(rs.getString("freeze_balance")));
 				request.setMemCode(rs.getString("exchange_fund_account"));
 				request.setFundAccountClear(rs.getString("fund_account"));
 				return request;
@@ -283,15 +283,15 @@ public class InitDataSend extends AbstractSend {
 	}
 	
 	public List<AccountAssetUpdateRequest> findAssetBalFromDb(int start, int offset) {
-		String sql = "select a.*,b.exchange_mem_code,c.product_code from asset_account_balance a left join mem_users b on a.mem_code=b.mem_code left join product_info c on a.product_in_id=c.product_code limit ?,? ";
+		String sql = "select a.*,b.exchange_mem_code,c.product_code from asset_account_balance a left join mem_users b on a.mem_code=b.mem_code left join product_info c on a.product_in_id=c.product_in_id limit ?,? ";
 		return dbManager.getJdbcTemplate().query(sql, new Object[] { start, offset }, new RowMapper() {
 			@Override
 			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 				AccountAssetUpdateRequest request = new AccountAssetUpdateRequest();
 				request.setMemCode(rs.getString("exchange_mem_code"));
-				request.setProductCode(rs.getString("product_code"));
-				request.setHoldPrice(NumberUtil.getDoubleFromStr(rs.getString("hold_price")));
-				request.setQuantity(NumberUtil.getDoubleFromStr(rs.getString("share_quantity")));
+				request.setProductCode(rs.getString("product_code")!=null ? rs.getString("product_code"):rs.getString("product_in_id"));
+				request.setHoldPrice(NumberUtil.getBigDecimalFromStr(rs.getString("hold_price")));
+				request.setQuantity(NumberUtil.getBigDecimalFromStr(rs.getString("share_quantity")));
 				return request;
 			}
 		});

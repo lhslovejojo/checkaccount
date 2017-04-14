@@ -83,7 +83,7 @@ public class TollSend extends AbstractSend {
 				request.setBizType(rs.getString("biz_type"));
 
 				request.setExchangeFeesType(rs.getString("exchange_fees_type"));
-				request.setFeesBalance(NumberUtil.getLongFromStr(rs.getString("fees_balance")));
+				request.setFeesBalance(NumberUtil.getBigDecimalFromStr(rs.getString("fees_balance")));
 				request.setPayerMemCode(rs.getString("payer_mem_code"));
 				request.setPayerFundAccount(rs.getString("payer_fund_account"));
 
