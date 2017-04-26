@@ -39,6 +39,10 @@ public class ClientInfoModServiceImpl extends AbstractAnalysisService implements
 		// TODO Auto-generated method stub
 		super.getFileFromFtp(dayStr, fileExpression);
 		File fileDirFile = new File(ftpToLocalDir+dayStr);
+		if (!fileDirFile.exists())
+		{
+			throw new AnalysisException(Constants.analysis_data_error_code, "对账文件不存在");
+		}
 		File[] files = fileDirFile.listFiles();
 		if (files != null && files.length > 0) {
 			sortFileArrayByName(files);

@@ -46,6 +46,9 @@ public class MainHandlerTask {
 		if (analysisRecord != null && analysisRecord.getStatus().equals(Constants.task_status_doing)) {
 			return RetVo.getDoingRet(dayStr + "日期的文件处理中，请稍后");
 		}
+		if (analysisRecord != null && analysisRecord.getStatus().equals(Constants.task_status_success)) {
+			return RetVo.getSuccessRet();
+		}
 		if (analysisRecord != null) {
 			step = (analysisRecord.getErrorStep() != null && analysisRecord.getErrorStep()>0)? analysisRecord.getErrorStep() : 1;
 			analysisRecord.setErrorStep(null);
